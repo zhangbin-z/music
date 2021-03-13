@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zl.music.dao.UserMusicsMapper">
+    <sql id="sql">
+        umId,id,mId
+    </sql>
+    <sql id="sql1">
+        id,uName,password,rId,uSex,uBirthday
+    </sql>
+    <!--映射关系-->
+    <resultMap id="result" type="UserMusics">
+        <id column="umId" property="umId"/>
+        <result column="id" property="id"/>
+        <result column="mId" property="mId"/>
+        <association column="id" property="user"
+                    select="com.zl.music.dao.UserMusicsMapper.getUserById"/>
+        <collection column="mId" property="musics"
+                    select="com.zl.music.dao.MusicMapper.getByMid"/>
+    </resultMap>
+    <!--映射关系-->
+    <resultMap id="result1" type="UserMusics">
+        <id column="umId" property="umId"/>
+        <result column="id" property="id"/>
+        <result column="mId" property="mId"/>
+    </resultMap>
+    <!--通过用户id分页查询歌单-->
+    <select id="listById" parameterType="map" resultMap="result">
+        select <include refid="sql"/> from `user_musics` where id = #{id}
+        limit #{start},#{end}
+    </select>
+
+    <!--判断歌单是否存在-->
+    <select id="get" parameterType="int" resultMap="result1">
+        select <include refid="sql"/> from `user_musics`
+        <trim prefix="where" suffixOverrides="and">
+            <if test="null!=umId">
+                umId = #{umId} and
+            </if>
+            <if test="null!=id">
+                id = #{id} and
+            </if>
+            <if test="null!=mId">
+                mId = #{mId} and
+            </if>
+        </trim>
+    </select>
+
+    <!--添加歌单-->
+    <insert id="add" parameterType="UserMusics">
+        insert into `user_musics` (id,mId) values (#{id},#{mId})
+    </insert>
+
+    <!--通过歌单id删除歌单-->
+    <delete id="delete" parameterType="int">
+        delete from `user_musics` where umId = #{umId}
+    </delete>
+
+    <!--通过用户id查询用户-->
+    <select id="getUserById" resultType="User">
+        select <include refid="sql1"/> from `musicusers` where id = #{id}
+    </select>
+
+    <!--通过用户id查询歌单的总数-->
+    <select id="countById" parameterType="int" resultType="int">
+        select count(umId) from `user_musics` where id = #{id}
+    </select>
+
+</mapper>

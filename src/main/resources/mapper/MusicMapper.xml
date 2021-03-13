@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zl.music.dao.MusicMapper">
+    <sql id="musics">
+        mId,mName,sinId,mLanguage,mMood,mStyle,issue_date,mURL,
+        m_scanNum,mPicture,mDuration
+    </sql>
+
+    <!--映射关系-->
+    <resultMap id="result" type="Music">
+        <id column="mId" property="mId"/>
+        <result column="mName" property="mName"/>
+        <result column="sinId" property="sinId"/>
+        <result column="mLanguage" property="mLanguage"/>
+        <result column="mMood" property="mMood"/>
+        <result column="mStyle" property="mStyle"/>
+        <result column="issue_date" property="issueDate"/>
+        <result column="mURL" property="mURL"/>
+        <result column="m_scanNum" property="mScanNum"/>
+        <result column="mPicture" property="mPicture"/>
+        <result column="mDuration" property="mDuration"/>
+        <association column="sinId" property="singer"
+                     select="com.zl.music.dao.SingerMapper.get"/>
+    </resultMap>
+
+    <!--映射关系-->
+    <resultMap id="result1" type="Music">
+        <id column="mId" property="mId"/>
+        <result column="mName" property="mName"/>
+        <result column="sinId" property="sinId"/>
+        <result column="mLanguage" property="mLanguage"/>
+        <result column="mMood" property="mMood"/>
+        <result column="mStyle" property="mStyle"/>
+        <result column="issue_date" property="issueDate"/>
+        <result column="mURL" property="mURL"/>
+        <result column="m_scanNum" property="mScanNum"/>
+        <result column="mPicture" property="mPicture"/>
+        <result column="mDuration" property="mDuration"/>
+    </resultMap>
+
+    <!--删除音乐的方法-->
+    <delete id="delete" parameterType="int">
+        delete from `music` where mId = #{mId}
+    </delete>
+
+    <!--分页查询音乐的通用方法(集合中应放入一个music对象和分页开始和结束三个元素)-->
+    <select id="musicListByPage" resultMap="result" parameterType="map">
+        select <include refid="musics"/> from `music`
+        <trim prefix="where" suffixOverrides="and">
+            <if test="null != music.mName">
+                mName = #{music.mName} and
+            </if>
+            <if test="0 != music.sinId">
+                sinId = #{music.sinId} and
+            </if>
+        </trim>
+        <trim prefix="where" suffixOverrides="or">
+            <if test="null != music.mLanguage">
+                mLanguage = #{music.mLanguage} or
+            </if>
+            <if test="null != music.mMood">
+                mMood = #{music.mMood} or
+            </if>
+            <if test="null != music.mStyle">
+                mStyle = #{music.mStyle} or
+            </if>
+        </trim>
+        <if test="null != music.issueDate">
+            order by issue_date desc
+        </if>
+        <if test="0 != music.mScanNum">
+            order by m_scanNum desc
+        </if>
+        limit #{start},#{end}
+    </select>
+
+    <!--通过id查询单个音乐-->
+    <select id="get" resultMap="result" parameterType="Music">
+        select <include refid="musics"/> from `music`
+        <trim prefix="where" suffixOverrides="and">
+            <if test="0!=mId">
+                mId = #{mId} and
+            </if>
+            <if test="null != mName">
+                mName = #{mName} and
+            </if>
+            <if test="0 != sinId">
+                sinId = #{sinId} and
+            </if>
+            <if test="null != mLanguage">
+                mLanguage = #{mLanguage} and
+            </if>
+            <if test="null != mMood">
+                mMood = #{mMood} and
+            </if>
+            <if test="null != mStyle">
+                mStyle = #{mStyle} and
+            </if>
+            <if test="null != issueDate">
+                issue_date = #{issueDate} and
+            </if>
+            <if test="0 != mScanNum">
+                m_scanNum = #{mScanNum} and
+            </if>
+            <if test="null!=mURL">
+                mURL = #{mURL} and
+            </if>
+            <if test="null!=mPicture">
+                mPicture = #{mPicture} and
+            </if>
+        </trim>
+    </select>
+
+    <!--添加音乐的方法-->
+    <insert id="add" parameterType="Music">
+        insert into `music` (mName,sinId,mLanguage,mMood,mStyle,issue_date,mURL,m_scanNum,mPicture,mDuration)
+        values (#{mName},#{sinId},#{mLanguage},#{mMood},#{mStyle},#{issueDate},#{mURL},#{mScanNum},#{mPicture},#{mDuration})
+    </insert>
+
+    <!--根据不同条件得到对应的音乐条数-->
+    <select id="getMusicTotal" resultType="int" parameterType="Music">
+        select count(mId) from `music`
+        <trim prefix="where" suffixOverrides="and">
+            <if test="null != mName">
+                mName = #{mName} and
+            </if>
+            <if test="0 != sinId">
+                sinId = #{sinId} and
+            </if>
+            <if test="null != mLanguage">
+                mLanguage = #{mLanguage} and
+            </if>
+            <if test="null != mMood">
+                mMood = #{mMood} and
+            </if>
+            <if test="null != mStyle">
+                mStyle = #{mStyle} and
+            </if>
+        </trim>
+        <if test="null != issueDate">
+            order by issue_date desc
+        </if>
+        <if test="0 != mScanNum">
+            order by m_scanNum desc
+        </if>
+    </select>
+
+    <select id="musicListBySinId" parameterType="int" resultMap="result1">
+        select <include refid="musics"/> from `music` where sinId = #{sinId}
+    </select>
+
+    <!--查询所有老歌（80年代以前的歌）-->
+    <select id="oldMusicList" resultMap="result">
+        select <include refid="musics"/> from `music` where year (issue_date) &lt;= 2017
+    </select>
+
+    <!--分页查询热门歌手-->
+    <select id="hotSinger" parameterType="map" resultMap="result">
+        select <include refid="musics"/> from `music` group by sinId order by sum(m_scanNum) desc
+        limit #{start},#{end}
+    </select>
+
+    <!--通过歌曲id修改歌曲的点击率-->
+    <update id="updateSanNum" parameterType="int">
+        update `music` set m_scanNum = m_scanNum + 1
+    </update>
+
+    <select id="getByMid" resultMap="result" parameterType="int">
+        select <include refid="musics"/> from `music` where mId = #{mId}
+    </select>
+</mapper>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zl.music.dao.SingerMapper">
+    <sql id="singers">
+        sinId,sinName,sinSex,sinRegion,sinPicture
+    </sql>
+
+    <!--映射关系-->
+    <resultMap id="result" type="Singer">
+        <id column="sinId" property="sinId"/>
+        <result column="sinName" property="sinName"/>
+        <result column="sinSex" property="sinSex"/>
+        <result column="sinRegion" property="sinRegion"/>
+        <result column="sinPicture" property="sinPicture"/>
+        <collection column="sinId" property="musics"
+                    select="com.zl.music.dao.MusicMapper.musicListBySinId"/>
+    </resultMap>
+
+    <!--映射关系-->
+    <resultMap id="result1" type="Singer">
+        <id column="sinId" property="sinId"/>
+        <result column="sinName" property="sinName"/>
+        <result column="sinSex" property="sinSex"/>
+        <result column="sinRegion" property="sinRegion"/>
+        <result column="sinPicture" property="sinPicture"/>
+    </resultMap>
+    <!--分页查询歌手的通用方法-->
+    <select id="singerList" resultMap="result" parameterType="map">
+        select <include refid="singers"/> from `singer`
+        <trim prefix="where" suffixOverrides="and">
+            <if test="0 != singer.sinId">
+                sinId = #{singer.sinId} and 
+            </if>
+            <if test="null != singer.sinSex">
+                sinSex = #{singer.sinSex} and
+            </if>
+            <if test="null != singer.sinRegion">
+                sinRegion = #{singer.sinRegion} and
+            </if>
+            <if test="null != singer.sinName">
+                sinName = #{singer.sinName} and
+            </if>
+        </trim>
+        limit #{start},#{end}
+    </select>
+    <!--通过id查询歌手的方法-->
+    <select id="get" resultMap="result1" parameterType="int">
+        select <include refid="singers"/> from `singer` where sinId = #{sinId}
+    </select>
+
+    <!--根据歌手名字查询歌手-->
+    <select id="getByName" resultMap="result1" parameterType="string">
+        select <include refid="singers"/> from `singer` where sinName = #{sinName}
+    </select>
+
+    <!--根据不同条件得到歌手总数-->
+    <select id="getSingerTotal" parameterType="Singer" resultType="int">
+        select count(sinId) from `singer`
+        <trim prefix="where" suffixOverrides="and">
+            <if test="null != sinSex">
+                sinSex = #{sinSex} and
+            </if>
+            <if test="null != sinRegion">
+                sinRegion = #{sinRegion} and
+            </if>
+            <if test="null != sinName">
+                sinName = #{sinName} and
+            </if>
+        </trim>
+    </select>
+      <!-- 查询所有歌手-->
+    <select id="getAll" resultMap="result1">
+        select <include refid="singers"/> from `singer`
+    </select>
+</mapper>

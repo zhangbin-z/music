@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zl.music.dao.CommentMapper">
+    <!--字段-->
+    <sql id="sql">
+        comId,mId,id,com_text,com_date
+    </sql>
+    <!--映射关系-->
+    <resultMap id="result" type="Comment">
+        <id column="comId" property="comId"/>
+        <result column="mId" property="mId"/>
+        <result column="id" property="id"/>
+        <result column="com_text" property="comText"/>
+        <result column="com_date" property="comDate"/>
+        <association column="id" property="user"
+                     select="com.zl.music.dao.CommentMapper.getUserById"/>
+    </resultMap>
+
+    <!--通过歌曲id查询所有评论-->
+    <select id="listBymId" resultMap="result" parameterType="int">
+        select <include refid="sql"/> from `comment` where mId = #{mId}
+        order by com_date desc
+    </select>
+
+    <!--添加评论-->
+    <insert id="add" parameterType="Comment">
+        insert into `comment` (mId,id,com_text,com_date) values
+        (#{mId},#{id},#{comText},#{comDate})
+    </insert>
+
+    <!--通过歌曲id查询评论数量-->
+    <select id="count" parameterType="int" resultType="int">
+        select count(comId) from `comment`where mId = #{mId}
+    </select>
+
+    <!--user级联-->
+    <select id="getUserById" resultType="User">
+        select * from `musicusers` where id = #{id}
+    </select>
+
+</mapper>
