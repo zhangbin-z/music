@@ -6,6 +6,7 @@ public class Test {
     public static void main(String[] args) {
         String i = FileUpload.date("09/12/2018" +
                 "bbbb");
+                "ssssss");
 
         System.out.println(i);
         Student p = new Student();
